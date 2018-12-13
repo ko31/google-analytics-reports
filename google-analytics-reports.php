@@ -14,11 +14,4 @@
 
 require_once( dirname( __FILE__ ) . '/vendor/autoload.php' );
 
-//register_activation_hook( __FILE__, function() {
-//	if ( ! defined( 'BOGO_VERSION' ) ) {
-//		deactivate_plugins( __FILE__ );
-//		exit( __( 'Sorry, Bogo is not installed.', 'bogodate' ) );
-//	}
-//});
-
 GoogleAnalyticsReports::get_instance()->register();
