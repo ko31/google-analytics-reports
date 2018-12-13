@@ -3,17 +3,16 @@
 namespace GoogleAnalyticsReports;
 
 /**
- * Customize the list table on the admin screen.
+ * Setting admin screen.
  *
  * @package GoogleAnalyticsReports
  */
-final class Admin
-{
+final class Admin {
 	private $prefix;
 	private $options;
 
 	public function __construct() {
-		$this->prefix = \GoogleAnalyticsReports::get_instance()->get_prefix();
+		$this->prefix  = \GoogleAnalyticsReports::get_instance()->get_prefix();
 		$this->options = get_option( $this->prefix );
 	}
 
@@ -22,6 +21,7 @@ final class Admin
 		if ( ! $instance ) {
 			$instance = new Admin();
 		}
+
 		return $instance;
 	}
 
@@ -70,30 +70,32 @@ final class Admin
 	public function secret_key_callback() {
 		$secret_key = isset( $this->options['secret_key'] ) ? $this->options['secret_key'] : '';
 		?>
-		<textarea name="<?php echo $this->prefix;?>[secret_key]" id="secret_key" rows="10" cols="50" class="large-text"><?php echo $secret_key;?></textarea>
+		<textarea name="<?php echo $this->prefix; ?>[secret_key]" id="secret_key" rows="10" cols="50"
+		          class="large-text"><?php echo $secret_key; ?></textarea>
 		<?php
 	}
 
 	public function view_id_callback() {
 		$view_id = isset( $this->options['view_id'] ) ? $this->options['view_id'] : '';
 		?>
-		<input name="<?php echo $this->prefix;?>[view_id]" type="text" id="view_id" value="<?php echo $view_id;?>" class="regular-text">
+		<input name="<?php echo $this->prefix; ?>[view_id]" type="text" id="view_id" value="<?php echo $view_id; ?>"
+		       class="regular-text">
 		<?php
 	}
 
 	public function display() {
 		$action = untrailingslashit( admin_url() ) . '/options.php';
-?>
+		?>
 		<div class="wrap GoogleAnalyticsReports-settings">
 			<h1 class="wp-heading-inline"><?php _e( 'Google Analytics Settings', 'GoogleAnalyticsReports' ); ?></h1>
 			<form action="<?php echo esc_url( $action ); ?>" method="post">
-<?php
-			settings_fields( $this->prefix . '-settings' );
-			do_settings_sections( $this->prefix );
-			submit_button();
-?>
+				<?php
+				settings_fields( $this->prefix . '-settings' );
+				do_settings_sections( $this->prefix );
+				submit_button();
+				?>
 			</form>
 		</div>
-<?php
+		<?php
 	}
 }
