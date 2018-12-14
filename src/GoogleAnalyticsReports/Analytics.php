@@ -66,10 +66,6 @@ final class Analytics {
 	/**
 	 * Queries the Analytics Reporting API V4.
 	 *
-	 * @param string $from
-	 * @param string $to
-	 * @param string $metrics
-	 * @param array $dimensions
 	 * @param array $args
 	 *
 	 * @return The Analytics Reporting API V4 response.
@@ -81,14 +77,15 @@ final class Analytics {
 		}
 
 		$defaults = [
-			'from'          => '7daysAgo',
-			'to'            => 'today',
-			'metrics'       => 'ga:sessions',
-			'dimensions'    => 'ga:pagePath',
-			'pageSize'      => 100,
-			'sortFieldName' => 'ga:sessions',
-			'sortOrderType' => 'VALUE',
-			'sortOrder'     => 'DESCENDING',
+			'from'            => '7daysAgo',
+			'to'              => 'today',
+			'metrics'         => 'ga:sessions',
+			'dimensions'      => 'ga:pagePath',
+			'dimensionFilter' => [],
+			'pageSize'        => 100,
+			'sortFieldName'   => 'ga:sessions',
+			'sortOrderType'   => 'VALUE',
+			'sortOrder'       => 'DESCENDING',
 		];
 		$args     = wp_parse_args( $args, $defaults );
 
@@ -129,14 +126,28 @@ final class Analytics {
 		// Create the ReportRequest object.
 		$request = new \Google_Service_AnalyticsReporting_ReportRequest();
 		$request->setViewId( $this->view_id );
-		$request->setDateRanges( $dateRange );
-		$request->setDimensions( $dimensions );
-		$request->setMetrics( $metrics );
-		$request->setOrderBys( $orderby );
+		$request->setDateRanges( [ $dateRange ] );
+		$request->setDimensions( [ $dimensions ] );
+		$request->setMetrics( [ $metrics ] );
+		$request->setOrderBys( [ $orderby ] );
 		$request->setPageSize( $args['pageSize'] );
 
+		if ( ! empty( $args['dimensionFilter'] ) ) {
+			// Create the DimensionFilter object.
+			$segmentDimensionFilter = new \Google_Service_AnalyticsReporting_SegmentDimensionFilter;
+			$segmentDimensionFilter->setDimensionName( $args['dimensionFilter']['dimensionName'] );
+			$segmentDimensionFilter->setOperator( $args['dimensionFilter']['operator'] );
+			$segmentDimensionFilter->setExpressions( $args['dimensionFilter']['expressions'] );
+
+			$dimensionFilterClause = new \Google_Service_AnalyticsReporting_DimensionFilterClause;
+			$dimensionFilterClause->setFilters( $segmentDimensionFilter );
+
+			$request->setDimensionFilterClauses( $dimensionFilterClause );
+		}
+
+		// Call the batchGet method.
 		$body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
-		$body->setReportRequests( array( $request ) );
+		$body->setReportRequests( [ $request ] );
 
 		return $this->analytics->reports->batchGet( $body );
 	}
