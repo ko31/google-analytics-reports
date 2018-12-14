@@ -8,3 +8,6 @@ node_modules/
 *.tar.gz
 *.zip
 /vendor/
+
+.idea/**/workspace.xml
+.idea/**/tasks.xml
