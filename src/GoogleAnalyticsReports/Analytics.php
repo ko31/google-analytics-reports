@@ -74,51 +74,65 @@ final class Analytics {
 	 *
 	 * @return The Analytics Reporting API V4 response.
 	 */
-	function get_report( $from, $to, $metrics, $dimensions, $args = [] ) {
+	function get_report( $args = [] ) {
 
 		if ( ! $this->analytics ) {
 			return new \WP_Error( 500, __( 'API connection is invalid', $this->prefix ) );
 		}
 
 		$defaults = [
-			'pageSize' => 100,
+			'from'          => '7daysAgo',
+			'to'            => 'today',
+			'metrics'       => 'ga:sessions',
+			'dimensions'    => 'ga:pagePath',
+			'pageSize'      => 100,
+			'sortFieldName' => 'ga:sessions',
+			'sortOrderType' => 'VALUE',
+			'sortOrder'     => 'DESCENDING',
 		];
 		$args     = wp_parse_args( $args, $defaults );
 
 		// Create the DateRange object.
-		$_dateRange = new \Google_Service_AnalyticsReporting_DateRange();
-		$_dateRange->setStartDate( $from );
-		$_dateRange->setEndDate( $to );
+		$dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+		$dateRange->setStartDate( $args['from'] );
+		$dateRange->setEndDate( $args['to'] );
 
 		// Create the Metrics object.
-		$_metrics = new \Google_Service_AnalyticsReporting_Metric();
-		$_metrics->setExpression( $metrics );
-		$_metrics->setAlias( str_replace( 'ga:', '', $metrics ) );
+		$metrics = [];
+		if ( ! is_array( $args['metrics'] ) ) {
+			$args['metrics'] = (array) $args['metrics'];
+		}
+		array_map( function ( $metric ) use ( &$metrics ) {
+			$_m = new \Google_Service_AnalyticsReporting_Metric();
+			$_m->setExpression( $metric );
+			$_m->setAlias( str_replace( 'ga:', '', $metric ) );
+			$metrics[] = $_m;
+		}, $args['metrics'] );
 
 		//Create the Dimensions object.
-		$_dimensions = [];
-		if ( ! is_array( $dimensions ) ) {
-			$dimensions = (array) $dimensions;
+		$dimensions = [];
+		if ( ! is_array( $args['dimensions'] ) ) {
+			$args['dimensions'] = (array) $args['dimensions'];
 		}
-		foreach ( $dimensions as $dimension ) {
+		array_map( function ( $dimension ) use ( &$dimensions ) {
 			$_d = new \Google_Service_AnalyticsReporting_Dimension();
 			$_d->setName( $dimension );
-			$_dimensions[] = $_d;
-		}
+			$dimensions[] = $_d;
+		}, $args['dimensions'] );
 
 		// Create the Orderby object.
-		$_orderby = new \Google_Service_AnalyticsReporting_OrderBy();
-		$_orderby->setFieldName( $metrics );
-		$_orderby->setOrderType( 'VALUE' );
-		$_orderby->setSortOrder( 'DESCENDING' );
+		$orderby = new \Google_Service_AnalyticsReporting_OrderBy();
+		$orderby->setFieldName( $args['sortFieldName'] );
+		$orderby->setOrderType( $args['sortOrderType'] );
+		$orderby->setSortOrder( $args['sortOrder'] );
 
 		// Create the ReportRequest object.
 		$request = new \Google_Service_AnalyticsReporting_ReportRequest();
 		$request->setViewId( $this->view_id );
-		$request->setDateRanges( $_dateRange );
-		$request->setDimensions( $_dimensions );
-		$request->setMetrics( $_metrics );
-		$request->setOrderBys( $_orderby );
+		$request->setDateRanges( $dateRange );
+		$request->setDimensions( $dimensions );
+		$request->setMetrics( $metrics );
+		$request->setOrderBys( $orderby );
 		$request->setPageSize( $args['pageSize'] );
 
 		$body = new \Google_Service_AnalyticsReporting_GetReportsRequest();

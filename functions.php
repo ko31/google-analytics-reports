@@ -28,8 +28,8 @@ function gar_version() {
  * @since 1.0.0
  * @return array
  */
-function gar_reports( $from, $to, $metrics, $dimensions, $args = [] ) {
-	$reports = GoogleAnalyticsReports\Analytics::get_instance()->get_report( $from, $to, $metrics, $dimensions, $args );
+function gar_reports( $args = [] ) {
+	$reports = GoogleAnalyticsReports\Analytics::get_instance()->get_report( $args );
 
 	return $reports;
 }
