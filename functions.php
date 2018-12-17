@@ -33,3 +33,18 @@ function gar_reports( $args = [] ) {
 
 	return $reports;
 }
+
+/**
+ * Get post from URL
+ *
+ * @since 1.0.0
+ * @return null|WP_post
+ */
+function gar_url_to_post( $url ) {
+	$post_id = url_to_postid( $url );
+	if ( empty( $post_id ) ) {
+		return null;
+	}
+
+	return get_post( $post_id );
+}
