@@ -11,14 +11,17 @@ final class Analytics {
 	private $prefix;
 	private $options;
 
+	private $transient_expiration;
+
 	private $secret_key;
 	private $view_id;
 	private $analytics;
 
 	public function __construct() {
-		$this->prefix    = \GoogleAnalyticsReports::get_instance()->get_prefix();
-		$this->options   = get_option( $this->prefix );
-		$this->analytics = $this->initialize_analytics();
+		$this->prefix               = \GoogleAnalyticsReports::get_instance()->get_prefix();
+		$this->options              = get_option( $this->prefix );
+		$this->transient_expiration = DAY_IN_SECONDS;
+		$this->analytics            = $this->initialize_analytics();
 	}
 
 	public static function get_instance() {
@@ -89,6 +92,12 @@ final class Analytics {
 		];
 		$args     = wp_parse_args( $args, $defaults );
 
+		$transient_key = md5( serialize( $args ) );
+		$result        = get_transient( $transient_key );
+		if ( false !== $result ) {
+			return $result;
+		}
+
 		// Create the DateRange object.
 		$dateRange = new \Google_Service_AnalyticsReporting_DateRange();
 		$dateRange->setStartDate( $args['from'] );
@@ -149,7 +158,20 @@ final class Analytics {
 		$body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
 		$body->setReportRequests( [ $request ] );
 
-		return $this->analytics->reports->batchGet( $body );
+		$result = $this->analytics->reports->batchGet( $body );
+
+		delete_transient( $transient_key );
+		/**
+		 * gar_set_transient_expiration
+		 *
+		 * @param int $expiration
+		 *
+		 * @return int
+		 */
+		$expiration = apply_filters( 'gar_set_transient_expiration', $this->transient_expiration );
+		set_transient( $transient_key, $result, $expiration );
+
+		return $result;
 	}
 
 }
