@@ -67,6 +67,47 @@ final class Analytics {
 	}
 
 	/**
+	 * Check settings
+	 *
+	 * @return bool|WP_Error
+	 */
+	function check_settings() {
+		if ( empty( $this->secret_key ) || empty( $this->view_id ) ) {
+			return false;
+		}
+
+		json_decode( $this->secret_key );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			return new \WP_Error( 500, __( 'Secret Key is invalid', $this->prefix ) );
+		}
+
+		if ( ! preg_match( "/^[0-9]+$/", $this->view_id ) ) {
+			return new \WP_Error( 500, __( 'View ID is invalid', $this->prefix ) );
+		}
+
+		try {
+			$request = new \Google_Service_AnalyticsReporting_ReportRequest();
+			$request->setViewId( $this->view_id );
+
+			$body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+			$body->setReportRequests( [ $request ] );
+
+			$result = $this->analytics->reports->batchGet( $body );
+
+			return true;
+
+		} catch ( \Exception $e ) {
+
+			$result = json_decode( $e->getMessage() );
+			if ( json_last_error() === JSON_ERROR_NONE ) {
+				return new \WP_Error( 500, sprintf( __( 'API settings is Invalid (%s %s)', $this->prefix ), $result->error->code, $result->error->message ) );
+			}
+
+			return new \WP_Error( 500, __( 'API settings is invalid', $this->prefix ) );
+		}
+	}
+
+	/**
 	 * Queries the Analytics Reporting API V4.
 	 *
 	 * @param array $args
@@ -75,7 +116,7 @@ final class Analytics {
 	 */
 	function get_report( $args = [] ) {
 
-		if ( ! $this->analytics ) {
+		if ( empty( $this->analytics ) ) {
 			return new \WP_Error( 500, __( 'API connection is invalid', $this->prefix ) );
 		}
 

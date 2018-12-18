@@ -65,6 +65,14 @@ final class Admin {
 			$this->prefix,
 			'api_settings'
 		);
+
+		add_settings_field(
+			'checker',
+			'',
+			array( $this, 'checker_callback' ),
+			$this->prefix,
+			'api_settings'
+		);
 	}
 
 	public function secret_key_callback() {
@@ -81,6 +89,15 @@ final class Admin {
 		<input name="<?php echo $this->prefix; ?>[view_id]" type="text" id="view_id" value="<?php echo $view_id; ?>"
 		       class="regular-text">
 		<?php
+	}
+
+	public function checker_callback() {
+		$result = \GoogleAnalyticsReports\Analytics::get_instance()->check_settings();
+		if ( is_wp_error( $result ) ) {
+			echo '<p class="description">' . $result->get_error_message() . '</p>';
+		} else {
+			echo '<p class="description">' . __( 'API settings is valid', $this->prefix ) . '</p>';
+		}
 	}
 
 	public function display() {
