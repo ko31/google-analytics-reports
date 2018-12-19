@@ -110,6 +110,9 @@ final class Analytics {
 	/**
 	 * Queries the Analytics Reporting API V4.
 	 *
+	 * @link https://developers.google.com/analytics/devguides/reporting/core/v4/quickstart/service-php
+	 * @link https://developers.google.com/analytics/devguides/reporting/core/v4/rest/v4/reports/batchGet
+	 *
 	 * @param array $args
 	 *
 	 * @return The Analytics Reporting API V4 response.|WP_Error
@@ -158,7 +161,7 @@ final class Analytics {
 				$metrics[] = $_m;
 			}, $args['metrics'] );
 
-			//Create the Dimensions object.
+			// Create the Dimensions object.
 			$dimensions = [];
 			if ( ! is_array( $args['dimensions'] ) ) {
 				$args['dimensions'] = (array) $args['dimensions'];
@@ -184,15 +187,30 @@ final class Analytics {
 			$request->setOrderBys( [ $orderby ] );
 			$request->setPageSize( $args['pageSize'] );
 
+			// Create the DimensionFilter
 			if ( ! empty( $args['dimensionFilter'] ) ) {
-				// Create the DimensionFilter object.
-				$segmentDimensionFilter = new \Google_Service_AnalyticsReporting_SegmentDimensionFilter;
-				$segmentDimensionFilter->setDimensionName( $args['dimensionFilter']['dimensionName'] );
-				$segmentDimensionFilter->setOperator( $args['dimensionFilter']['operator'] );
-				$segmentDimensionFilter->setExpressions( $args['dimensionFilter']['expressions'] );
 
-				$dimensionFilterClause = new \Google_Service_AnalyticsReporting_DimensionFilterClause;
-				$dimensionFilterClause->setFilters( $segmentDimensionFilter );
+				$dimensionFilters = [];
+
+				$args['dimensionFilter'] = (array) $args['dimensionFilter'];
+
+				foreach ( $args['dimensionFilter'] as $filter ) {
+
+					// Create the DimensionFilter object.
+					$dimensionFilter = new \Google_Service_AnalyticsReporting_DimensionFilter();
+					$dimensionFilter->setDimensionName( $filter['dimensionName'] );
+					$dimensionFilter->setOperator( $filter['operator'] );
+					$dimensionFilter->setExpressions( $filter['expressions'] );
+					if ( isset( $filter['not'] ) ) {
+						$dimensionFilter->setNot( $filter['not'] );
+					}
+
+					$dimensionFilters[] = $dimensionFilter;
+				}
+
+				$dimensionFilterClause = new \Google_Service_AnalyticsReporting_DimensionFilterClause();
+				$dimensionFilterClause->setFilters( $dimensionFilters );
+				$dimensionFilterClause->setOperator( 'and' );
 
 				$request->setDimensionFilterClauses( $dimensionFilterClause );
 			}
