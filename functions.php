@@ -35,6 +35,44 @@ function gar_reports( $args = [] ) {
 }
 
 /**
+ * Get reports in post
+ *
+ * @since 1.0.0
+ * @return array
+ */
+function gar_report_posts( $args = [] ) {
+	$posts = [];
+
+	$reports  = gar_reports( $args );
+
+	if ( is_wp_error( $reports ) ) {
+		return $posts;
+	}
+
+	$page_path_index = ( ! empty( $args['page_path_index'] ) ? $args['page_path_index'] : 0 );
+
+	$report = $reports[0];
+	$rows   = $report->getData()->getRows();
+	for ( $i = 0; $i < count( $rows ); $i ++ ) {
+		$row        = $rows[ $i ];
+		$dimensions = $row->getDimensions();
+		$metrics    = $row->getMetrics();
+		$values     = $metrics[0]->getValues();
+
+		$_post = gar_url_to_post( $dimensions[ $page_path_index ] );
+		if ( empty( $_post ) ) {
+			$_post = new \stdClass();
+		}
+		$_post->dimensions = $dimensions;
+		$_post->metrics    = $values;
+
+		$posts[] = $_post;
+	}
+
+	return $posts;
+}
+
+/**
  * Get post from URL
  *
  * @since 1.0.0
