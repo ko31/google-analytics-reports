@@ -26,7 +26,8 @@ function gar_version() {
  * Get reports
  *
  * @since 1.0.0
- * @return array
+ * @param array $args
+ * @return \WP_Error|\Google_Service_AnalyticsReporting_GetReportsResponse
  */
 function gar_reports( $args = [] ) {
 	$reports = GoogleAnalyticsReports\Analytics::get_instance()->get_report( $args );
@@ -38,6 +39,7 @@ function gar_reports( $args = [] ) {
  * Get reports in post
  *
  * @since 1.0.0
+ * @param array $args
  * @return array
  */
 function gar_report_posts( $args = [] ) {
@@ -76,6 +78,7 @@ function gar_report_posts( $args = [] ) {
  * Get post from URL
  *
  * @since 1.0.0
+ * @param string $url
  * @return null|WP_post
  */
 function gar_url_to_post( $url ) {

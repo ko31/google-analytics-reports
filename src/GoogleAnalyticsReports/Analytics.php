@@ -36,7 +36,7 @@ final class Analytics {
 	/**
 	 * Initializes an Analytics Reporting API V4 service object.
 	 *
-	 * @return An authorized Analytics Reporting API V4 service object.
+	 * @return \WP_Error|\Google_Service_AnalyticsReporting An authorized Analytics Reporting API V4 service object.
 	 */
 	public function initialize_analytics() {
 		$this->secret_key = $this->options['secret_key'];
@@ -60,7 +60,7 @@ final class Analytics {
 			$analytics = new \Google_Service_AnalyticsReporting( $client );
 		} catch ( \Exception $e ) {
 			// TODO:
-			return new \WP_Error( 500, __( $e->getMessage(), $this->prefix ) );
+			return new \WP_Error( 500, $e->getMessage() );
 		}
 
 		return $analytics;
@@ -115,12 +115,12 @@ final class Analytics {
 	 *
 	 * @param array $args
 	 *
-	 * @return The Analytics Reporting API V4 response.|WP_Error
+	 * @return \WP_Error|\Google_Service_AnalyticsReporting_GetReportsResponse The Analytics Reporting API V4 response.
 	 */
 	function get_report( $args = [] ) {
 
 		if ( empty( $this->analytics ) ) {
-			return;
+			return new \WP_Error( 500, __( 'Google Analytics setting is invalid.', 'google-analytics-reports' ) );
 		}
 
 		$defaults = [
