@@ -36,7 +36,7 @@ final class Analytics {
 	/**
 	 * Initializes an Analytics Reporting API V4 service object.
 	 *
-	 * @return An authorized Analytics Reporting API V4 service object.
+	 * @return \WP_Error|\Google_Service_AnalyticsReporting An authorized Analytics Reporting API V4 service object.
 	 */
 	public function initialize_analytics() {
 		$this->secret_key = $this->options['secret_key'];
@@ -60,7 +60,7 @@ final class Analytics {
 			$analytics = new \Google_Service_AnalyticsReporting( $client );
 		} catch ( \Exception $e ) {
 			// TODO:
-			return new \WP_Error( 500, __( $e->getMessage(), $this->prefix ) );
+			return new \WP_Error( 500, $e->getMessage() );
 		}
 
 		return $analytics;
@@ -69,20 +69,20 @@ final class Analytics {
 	/**
 	 * Check settings
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	function check_settings() {
 		if ( empty( $this->secret_key ) || empty( $this->view_id ) ) {
-			return false;
+			return new \WP_Error( 500, __( 'Option is not set.', 'google-analytics-reports' ) );
 		}
 
 		json_decode( $this->secret_key );
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			return new \WP_Error( 500, __( 'Secret Key is invalid', $this->prefix ) );
+			return new \WP_Error( 500, __( 'Secret Key is invalid', 'google-analytics-reports' ) );
 		}
 
 		if ( ! preg_match( "/^[0-9]+$/", $this->view_id ) ) {
-			return new \WP_Error( 500, __( 'View ID is invalid', $this->prefix ) );
+			return new \WP_Error( 500, __( 'View ID is invalid', 'google-analytics-reports' ) );
 		}
 
 		try {
@@ -100,10 +100,10 @@ final class Analytics {
 
 			$result = json_decode( $e->getMessage() );
 			if ( json_last_error() === JSON_ERROR_NONE ) {
-				return new \WP_Error( 500, sprintf( __( 'API settings is Invalid (%s %s)', $this->prefix ), $result->error->code, $result->error->message ) );
+				return new \WP_Error( 500, sprintf( __( 'API settings is Invalid (%s %s)', 'google-analytics-reports' ), $result->error->code, $result->error->message ) );
 			}
 
-			return new \WP_Error( 500, __( 'API settings is invalid', $this->prefix ) );
+			return new \WP_Error( 500, __( 'API settings is invalid', 'google-analytics-reports' ) );
 		}
 	}
 
@@ -115,12 +115,12 @@ final class Analytics {
 	 *
 	 * @param array $args
 	 *
-	 * @return The Analytics Reporting API V4 response.|WP_Error
+	 * @return \WP_Error|\Google_Service_AnalyticsReporting_GetReportsResponse The Analytics Reporting API V4 response.
 	 */
 	function get_report( $args = [] ) {
 
 		if ( empty( $this->analytics ) ) {
-			return;
+			return new \WP_Error( 500, __( 'Google Analytics setting is invalid.', 'google-analytics-reports' ) );
 		}
 
 		$defaults = [
@@ -238,10 +238,10 @@ final class Analytics {
 
 			$result = json_decode( $e->getMessage() );
 			if ( json_last_error() === JSON_ERROR_NONE ) {
-				return new \WP_Error( 500, sprintf( __( 'API request failed (%s %s)', $this->prefix ), $result->error->code, $result->error->message ) );
+				return new \WP_Error( 500, sprintf( __( 'API request failed (%s %s)', 'google-analytics-reports' ), $result->error->code, $result->error->message ) );
 			}
 
-			return new \WP_Error( 500, __( 'API request failed', $this->prefix ) );
+			return new \WP_Error( 500, __( 'API request failed', 'google-analytics-reports' ) );
 		}
 
 
