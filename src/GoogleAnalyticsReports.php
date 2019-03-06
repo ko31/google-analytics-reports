@@ -22,7 +22,7 @@ class GoogleAnalyticsReports {
 	}
 
 	public function plugins_loaded() {
-		load_plugin_textdomain( $this->get_prefix(), false, 'GoogleAnalyticsReports/languages' );
+		load_plugin_textdomain( 'google-analytics-reports', false, basename( dirname( __DIR__) ) . '/languages' );
 		if ( is_admin() ) {
 			GoogleAnalyticsReports\Admin::get_instance()->register();
 		}

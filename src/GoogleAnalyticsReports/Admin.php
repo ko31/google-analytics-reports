@@ -32,8 +32,8 @@ final class Admin {
 
 	public function admin_menu() {
 		add_options_page(
-			__( 'Google Analytics Reports', $this->prefix ),
-			__( 'Google Analytics Reports', $this->prefix ),
+			__( 'Google Analytics Reports', 'google-analytics-reports' ),
+			__( 'Google Analytics Reports', 'google-analytics-reports' ),
 			'manage_options',
 			$this->prefix,
 			array( $this, 'display' )
@@ -45,14 +45,14 @@ final class Admin {
 
 		add_settings_section(
 			'api_settings',
-			__( 'API settings', $this->prefix ),
+			__( 'API settings', 'google-analytics-reports' ),
 			null,
 			$this->prefix
 		);
 
 		add_settings_field(
 			'secret_key',
-			__( 'Secret Key', $this->prefix ),
+			__( 'Secret Key', 'google-analytics-reports' ),
 			array( $this, 'secret_key_callback' ),
 			$this->prefix,
 			'api_settings'
@@ -60,7 +60,7 @@ final class Admin {
 
 		add_settings_field(
 			'view_id',
-			__( 'View ID', $this->prefix ),
+			__( 'View ID', 'google-analytics-reports' ),
 			array( $this, 'view_id_callback' ),
 			$this->prefix,
 			'api_settings'
@@ -92,11 +92,11 @@ final class Admin {
 	}
 
 	public function checker_callback() {
-		$result = \GoogleAnalyticsReports\Analytics::get_instance()->check_settings();
+		$result = Analytics::get_instance()->check_settings();
 		if ( is_wp_error( $result ) ) {
-			echo '<p class="description">' . $result->get_error_message() . '</p>';
+			printf( '<p class="descrpition" style="color: red;">%s</p>', esc_html( $result->get_error_message() ) );
 		} else {
-			echo '<p class="description">' . __( 'API settings is valid', $this->prefix ) . '</p>';
+			printf( '<p class="description">%s</p>', esc_html__( 'API settings is valid', 'google-analytics-reports' ) );
 		}
 	}
 
