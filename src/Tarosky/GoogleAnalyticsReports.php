@@ -2,6 +2,8 @@
 namespace Tarosky;
 
 
+use Tarosky\GoogleAnalyticsReports\Tracker;
+
 class GoogleAnalyticsReports {
 	private $prefix = 'GoogleAnalyticsReports';
 
@@ -28,6 +30,7 @@ class GoogleAnalyticsReports {
 		if ( is_admin() ) {
 			GoogleAnalyticsReports\Admin::get_instance()->register();
 		}
+		Tracker::get_instance();
 	}
 
 	public function get_prefix() {
