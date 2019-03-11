@@ -1,35 +1,28 @@
 <?php
 
-namespace GoogleAnalyticsReports;
+namespace Tarosky\GoogleAnalyticsReports;
+
+use Tarosky\GoogleAnalyticsReports\Pattern\Singleton;
 
 /**
  * Setting admin screen.
  *
  * @package GoogleAnalyticsReports
  */
-final class Admin {
-	private $prefix;
-	private $options;
+final class Admin extends Singleton {
 
-	public function __construct() {
-		$this->prefix  = \GoogleAnalyticsReports::get_instance()->get_prefix();
-		$this->options = get_option( $this->prefix );
-	}
 
-	public static function get_instance() {
-		static $instance;
-		if ( ! $instance ) {
-			$instance = new Admin();
-		}
-
-		return $instance;
-	}
-
+	/**
+	 * Register hooks.
+	 */
 	public function register() {
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 	}
 
+	/**
+	 * Register admin menu.
+	 */
 	public function admin_menu() {
 		add_options_page(
 			__( 'Google Analytics Reports', 'google-analytics-reports' ),
@@ -40,15 +33,18 @@ final class Admin {
 		);
 	}
 
+	/**
+	 * Register settings.
+	 */
 	public function admin_init() {
-		register_setting( $this->prefix . '-settings', $this->prefix );
+		register_setting( $this->prefix, $this->prefix );
 
-		add_settings_section(
-			'api_settings',
-			__( 'API settings', 'google-analytics-reports' ),
-			null,
-			$this->prefix
-		);
+		add_settings_section( 'api_settings', __( 'API settings', 'google-analytics-reports' ), function() {
+			printf(
+				'<p class="description">%s</p>',
+				esc_html__( 'To interact with Gogole Analytics API to get stuff with report data, please set up options.', 'google-analytics-reports' )
+			);
+		}, $this->prefix );
 
 		add_settings_field(
 			'secret_key',
@@ -73,8 +69,37 @@ final class Admin {
 			$this->prefix,
 			'api_settings'
 		);
+
+		// Register tracking setting.
+		$section_name = 'google-analytics-reports-tracking';
+		add_settings_section( $section_name, __( 'Tracking Setting', 'google-analytics-reports' ), function() {
+			printf(
+				'<p class="description">%s</p>',
+				esc_html__( 'These section will be used for ', 'google-analytics-reports' )
+			);
+		}, $this->prefix );
+		foreach ( [
+					  'author'  => _x( 'Custom Dimension / Author', 'dimension-name', 'google-analytics-reports' ),
+					  'post_id' => _x( 'Custom Dimension / Post ID', 'dimension-name', 'google-analytics-reports' ),
+				  ] as $key => $label ) {
+			$option_key = "google-analytics-reports-{$key}";
+			add_settings_field( $option_key, $label, function() use ( $option_key, $section_name, $label ) {
+				printf(
+					'<input name="%1$s" value="%2$s" class="regular-text" type="%3$s" /><p class="description">%4$s</p>',
+					esc_attr( $option_key ),
+					esc_attr( get_option( $option_key ) ),
+					'number',
+					esc_html( sprintf( __( 'To combine %s to page views, enter custom dimension index.', 'google-analytics-reports' ), $label ) ) // translators: %s is dimension name.
+				);
+			}, $this->prefix,  $section_name );
+			// Register fields.
+			register_setting( $this->prefix, $option_key );
+		}
 	}
 
+	/**
+	 * Render callback for secret key.
+	 */
 	public function secret_key_callback() {
 		$secret_key = isset( $this->options['secret_key'] ) ? $this->options['secret_key'] : '';
 		?>
@@ -83,6 +108,9 @@ final class Admin {
 		<?php
 	}
 
+	/**
+	 * Render callback for view id.
+	 */
 	public function view_id_callback() {
 		$view_id = isset( $this->options['view_id'] ) ? $this->options['view_id'] : '';
 		?>
@@ -91,6 +119,9 @@ final class Admin {
 		<?php
 	}
 
+	/**
+	 * Render callback for check id.
+	 */
 	public function checker_callback() {
 		$result = Analytics::get_instance()->check_settings();
 		if ( is_wp_error( $result ) ) {
@@ -100,6 +131,9 @@ final class Admin {
 		}
 	}
 
+	/**
+	 * Admin menu render callback.
+	 */
 	public function display() {
 		$action = untrailingslashit( admin_url() ) . '/options.php';
 		?>
@@ -107,7 +141,7 @@ final class Admin {
 			<h1 class="wp-heading-inline"><?php _e( 'Google Analytics Settings', 'GoogleAnalyticsReports' ); ?></h1>
 			<form action="<?php echo esc_url( $action ); ?>" method="post">
 				<?php
-				settings_fields( $this->prefix . '-settings' );
+				settings_fields( $this->prefix );
 				do_settings_sections( $this->prefix );
 				submit_button();
 				?>

@@ -30,7 +30,7 @@ function gar_version() {
  * @return \WP_Error|\Google_Service_AnalyticsReporting_GetReportsResponse
  */
 function gar_reports( $args = [] ) {
-	$reports = GoogleAnalyticsReports\Analytics::get_instance()->get_report( $args );
+	$reports = Tarosky\GoogleAnalyticsReports\Analytics::get_instance()->get_report( $args );
 
 	return $reports;
 }
@@ -89,3 +89,5 @@ function gar_url_to_post( $url ) {
 
 	return get_post( $post_id );
 }
+
+
