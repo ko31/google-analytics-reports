@@ -75,6 +75,48 @@ function gar_report_posts( $args = [] ) {
 }
 
 /**
+ * Get author ranking.
+ *
+ * ## Example
+ *
+ * foreach ( gar_author_pv_ranking() as list( $user_id, $pv ) {
+ *     // Do stuff.
+ * }
+ *
+ * @param $args
+ * @return array|WP_Error array of [ $user_id, $pv ]
+ */
+function gar_author_pv_ranking( $args = [] ) {
+	$dimension_index = get_option( 'google-analytics-reports-author' );
+	if ( ! $dimension_index ) {
+		return new WP_Error( 'not_set', __( 'This site does not collect author score.', 'google-analytics-reports' ), [
+			'status' => 500,
+		] );
+	}
+	$args = wp_parse_args( $args, [
+		'dimensions'    => sprintf( 'ga:dimension%d', $dimension_index ),
+		'metrics'       => 'ga:pageviews',
+		'sortFieldName' => 'ga:pageviews',
+	] );
+	$args = apply_filters( 'google_analytics_reporters_author_pv_ranking', $args );
+	$response = gar_reports( $args );
+	if ( is_wp_error( $response ) ) {
+		return $response;
+	}
+	$results = [];
+	foreach ( $response[0]->getData()->getRows() as $row ) {
+		$dimensions = $row->dimensions;
+		foreach ( $row->metrics as $metric ) {
+			foreach ( $metric->values as $value ) {
+				$dimensions[] = (int) $value;
+			}
+		}
+		$results[] = $dimensions;
+	}
+	return $results;
+}
+
+/**
  * Get post from URL
  *
  * @since 1.0.0
