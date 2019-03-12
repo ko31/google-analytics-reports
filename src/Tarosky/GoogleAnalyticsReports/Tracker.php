@@ -29,7 +29,6 @@ class Tracker extends Singleton {
 			'author'  => is_singular() ? get_queried_object()->post_author : null,
 		] as $key => $value ) {
 			$index = get_option( "google-analytics-reports-{$key}" );
-			var_dump( $index, $value, $key );
 			if ( ! $index || is_null( $value ) ) {
 				continue;
 			}
