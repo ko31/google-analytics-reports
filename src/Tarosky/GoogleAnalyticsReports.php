@@ -1,4 +1,8 @@
 <?php
+namespace Tarosky;
+
+
+use Tarosky\GoogleAnalyticsReports\Tracker;
 
 class GoogleAnalyticsReports {
 	private $prefix = 'GoogleAnalyticsReports';
@@ -18,7 +22,7 @@ class GoogleAnalyticsReports {
 	public function register() {
 		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
 
-		require_once( dirname( dirname( __FILE__ ) ) . '/functions.php' );
+		require_once( dirname( dirname( dirname( __FILE__ ) ) ) . '/functions.php' );
 	}
 
 	public function plugins_loaded() {
@@ -26,6 +30,7 @@ class GoogleAnalyticsReports {
 		if ( is_admin() ) {
 			GoogleAnalyticsReports\Admin::get_instance()->register();
 		}
+		Tracker::get_instance();
 	}
 
 	public function get_prefix() {

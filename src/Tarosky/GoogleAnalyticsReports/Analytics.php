@@ -1,36 +1,28 @@
 <?php
 
-namespace GoogleAnalyticsReports;
+namespace Tarosky\GoogleAnalyticsReports;
+
+use Tarosky\GoogleAnalyticsReports\Pattern\Singleton;
 
 /**
  * Customize the list table on the admin screen.
  *
  * @package GoogleAnalyticsReports
+ * @property-read string $view_id
+ * @property-read string $secret_key
  */
-final class Analytics {
-	private $prefix;
-	private $options;
+final class Analytics extends Singleton {
 
 	private $transient_expiration;
 
-	private $secret_key;
-	private $view_id;
 	private $analytics;
 
-	public function __construct() {
-		$this->prefix               = \GoogleAnalyticsReports::get_instance()->get_prefix();
-		$this->options              = get_option( $this->prefix );
-		$this->transient_expiration = DAY_IN_SECONDS;
+	/**
+	 * CConstructor
+	 */
+	protected function __construct() {
+		$this->transient_expiration = apply_filters( 'google_analytics_reporters_interval', DAY_IN_SECONDS );
 		$this->analytics            = $this->initialize_analytics();
-	}
-
-	public static function get_instance() {
-		static $instance;
-		if ( ! $instance ) {
-			$instance = new Analytics();
-		}
-
-		return $instance;
 	}
 
 	/**
@@ -39,11 +31,10 @@ final class Analytics {
 	 * @return \WP_Error|\Google_Service_AnalyticsReporting An authorized Analytics Reporting API V4 service object.
 	 */
 	public function initialize_analytics() {
-		$this->secret_key = $this->options['secret_key'];
-		$this->view_id    = $this->options['view_id'];
 
 		if ( empty( $this->secret_key ) || empty( $this->view_id ) ) {
-			// TODO:
+			// TODO: Writer todo.
+			return new \WP_Error( 500, __( 'Option is not set.', 'google-analytics-reporters' ) );
 		}
 
 		$handle = tmpfile();
@@ -101,9 +92,9 @@ final class Analytics {
 			$result = json_decode( $e->getMessage() );
 			if ( json_last_error() === JSON_ERROR_NONE ) {
 				return new \WP_Error( 500, sprintf( __( 'API settings is Invalid (%s %s)', 'google-analytics-reports' ), $result->error->code, $result->error->message ) );
+			} else {
+				return new \WP_Error( 500, sprintf( __( 'API settings is invalid: %s', 'google-analytics-reports' ), $e->getMessage() ) );
 			}
-
-			return new \WP_Error( 500, __( 'API settings is invalid', 'google-analytics-reports' ) );
 		}
 	}
 
@@ -245,6 +236,38 @@ final class Analytics {
 		}
 
 
+	}
+
+	/**
+	 * This class uses empty.
+	 *
+	 * @param string $name
+	 * @return bool
+	 */
+	public function __isset( $name ) {
+		switch ( $name ) {
+			case 'view_id':
+			case 'secret_key':
+				return true;
+			default:
+				return parent::__isset( $name );
+		}
+	}
+
+	/**
+	 * Getter
+	 *
+	 * @param string $name
+	 * @return mixed
+	 */
+	public function __get( $name ) {
+		switch ( $name ) {
+			case 'secret_key':
+			case 'view_id':
+				return isset( $this->options[ $name ] ) ? $this->options[ $name ] : '';
+			default:
+				return parent::__get( $name );
+		}
 	}
 
 }
