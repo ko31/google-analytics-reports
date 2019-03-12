@@ -21,8 +21,12 @@ class GoogleAnalyticsReports {
 
 	public function register() {
 		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
-
+		// Load functions.
 		require_once( dirname( dirname( dirname( __FILE__ ) ) ) . '/functions.php' );
+		// If this is cli environment, register commands.
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			\WP_CLI::add_command( \Tarosky\GoogleAnalyticsReports\Commands::COMMAND_NAME, \Tarosky\GoogleAnalyticsReports\Commands::class );
+		}
 	}
 
 	public function plugins_loaded() {

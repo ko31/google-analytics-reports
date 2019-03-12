@@ -90,4 +90,36 @@ function gar_url_to_post( $url ) {
 	return get_post( $post_id );
 }
 
-
+/**
+ * Get search keywords.
+ *
+ * @param array $args
+ *     *from     From date. Default '7daysAgo'.
+ *     *to       To date. Default 'today'.
+ *     *pazeSize Page size. Default 100.
+ * @return \WP_Error|array
+ */
+function gar_get_search_words( $args = [] ) {
+	$args = wp_parse_args( $args, [
+		'dimensions' => 'ga:searchKeyword',
+		'metrics' => 'ga:searchSessions',
+		'sortFieldName' => 'ga:searchSessions',
+	] );
+	$result = gar_reports( $args );
+	if ( is_wp_error( $result ) ) {
+		return $result;
+	}
+	$rows = $result[0]->getData()->getRows();
+	$filtered = [];
+	for ( $i = 0, $l = count( $rows ); $i < $l; $i++ ) {
+		$row = $rows[ $i ];
+		$dimensions = $row->dimensions;
+		foreach ( $row->metrics as $metric ) {
+			foreach ( $metric->values as $value ) {
+				$dimensions[] = (int) $value;
+			}
+		}
+		$filtered[] = $dimensions;
+	}
+	return $filtered;
+}
