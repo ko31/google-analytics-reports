@@ -75,21 +75,37 @@ final class Admin extends Singleton {
 		add_settings_section( $section_name, __( 'Tracking Setting', 'google-analytics-reports' ), function() {
 			printf(
 				'<p class="description">%s</p>',
-				esc_html__( 'These section will be used for ', 'google-analytics-reports' )
+				esc_html__( 'These section will be used for tracking code.', 'google-analytics-reports' )
 			);
 		}, $this->prefix );
 		foreach ( [
-					  'author'  => _x( 'Custom Dimension / Author', 'dimension-name', 'google-analytics-reports' ),
-					  'post_id' => _x( 'Custom Dimension / Post ID', 'dimension-name', 'google-analytics-reports' ),
+					  'tracking_id' => __( 'Tracking ID', 'google-analytics-reports' ),
+					  'author'      => _x( 'Custom Dimension / Author', 'dimension-name', 'google-analytics-reports' ),
+					  'post_id'     => _x( 'Custom Dimension / Post ID', 'dimension-name', 'google-analytics-reports' ),
+					  'type'        => _x( 'Custom Dimension / Post type', 'dimension-name', 'google-analytics-reports' ),
 				  ] as $key => $label ) {
 			$option_key = "google-analytics-reports-{$key}";
-			add_settings_field( $option_key, $label, function() use ( $option_key, $section_name, $label ) {
+			add_settings_field( $option_key, $label, function() use ( $option_key, $section_name, $label, $key ) {
+				switch( $key ) {
+					case 'tracking_id':
+						$desc = esc_html__( 'If you want to display tracking code, enter tracking ID. If you enable WooCommerce Google Analytics Integration, you don\'t have to fill.', 'google-analytics-reports' );
+						$placeholder = 'e.g. UA-xxxxxxxx-1';
+						$type = 'text';
+						break;
+					default:
+						// translators: %s is dimension name.
+						$desc = esc_html( sprintf( __( 'To combine %s to every single page views, enter custom dimension index.', 'google-analytics-reports' ), $label ) );
+						$placeholder = '';
+						$type = 'number';
+						break;
+				}
 				printf(
-					'<input name="%1$s" value="%2$s" class="regular-text" type="%3$s" /><p class="description">%4$s</p>',
+					'<input name="%1$s" value="%2$s" class="regular-text" type="%3$s" placeholder="%5$s" /><p class="description">%4$s</p>',
 					esc_attr( $option_key ),
 					esc_attr( get_option( $option_key ) ),
-					'number',
-					esc_html( sprintf( __( 'To combine %s to page views, enter custom dimension index.', 'google-analytics-reports' ), $label ) ) // translators: %s is dimension name.
+					$type,
+					$desc,
+					esc_attr( $placeholder )
 				);
 			}, $this->prefix,  $section_name );
 			// Register fields.
