@@ -17,6 +17,7 @@ class Commands extends \WP_CLI_Command {
 	 * @syonpsis [--from=<from>] [--to=<to>] [--pagesize=<pagesize>]
 	 * @param array $args
 	 * @param array $assoc
+	 * @throws \Exception
 	 */
 	public function search_words( $args, $assoc ) {
 		$result = gar_get_search_words( [
@@ -26,6 +27,8 @@ class Commands extends \WP_CLI_Command {
 		] );
 		if ( ! $result ) {
 			\WP_CLI::error( 'No keywords found. Please change period and try again.' );
+		} elseif ( is_wp_error( $result ) ) {
+			\WP_CLI::error( $result->get_error_message() );
 		}
 		$table = new \cli\Table();
 		$table->setHeaders( [ 'Keyword', 'Sessions' ] );

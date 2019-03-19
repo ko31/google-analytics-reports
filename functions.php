@@ -143,9 +143,9 @@ function gar_url_to_post( $url ) {
  */
 function gar_get_search_words( $args = [] ) {
 	$args = wp_parse_args( $args, [
-		'dimensions' => 'ga:searchKeyword',
-		'metrics' => 'ga:searchSessions',
-		'sortFieldName' => 'ga:searchSessions',
+		'dimensions'    => 'ga:searchKeyword',
+		'metrics'       => 'ga:searchUniques',
+		'sortFieldName' => 'ga:searchUniques',
 	] );
 	$result = gar_reports( $args );
 	if ( is_wp_error( $result ) ) {
