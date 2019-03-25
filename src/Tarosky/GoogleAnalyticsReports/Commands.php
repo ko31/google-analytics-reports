@@ -36,4 +36,35 @@ class Commands extends \WP_CLI_Command {
 		$table->display();
 		\WP_CLI::success( sprintf('%d keywords found.', count( $result ) ) );
 	}
+	
+	/**
+	 * Get popular ranking.
+	 *
+	 * @synopsis [--from=<from>] [--to=<to>] [--limit=<limit>]
+	 * @param array $args
+	 * @param array $assoc
+	 */
+	public function get_ranking( $args, $assoc ) {
+		$from  = $assoc['from'] ?? '7daysAgo';
+		$to    = $assoc['to'] ?? 'today';
+		$limit = intval( $assoc['limit'] ?? 10 );
+		$result = gar_post_precise_ranking( $from, $to, $limit );
+		if ( is_wp_error( $result ) ) {
+			\WP_CLI::error( $result->get_error_message() );
+		}
+		if ( ! $result ) {
+			\WP_CLI::error( 'No results found.' );
+		}
+		$table = new \cli\Table();
+		$table->setHeaders( [ 'Rank', 'ID', 'Title', 'PV'] );
+		$table->setRows( array_map( function( $post ) {
+			return [
+				$post->rank,
+				sprintf( '#%d', $post->ID ),
+				get_the_title( $post ),
+				number_format_i18n( $post->pv ),
+			];
+		}, $result ) );
+		$table->display();
+	}
 }
