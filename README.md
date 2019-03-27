@@ -1,5 +1,7 @@
 # Google Analytics Reports
 
+[![Build Status](https://travis-ci.org/tarosky/google-analytics-reports.svg?branch=master)](https://travis-ci.org/tarosky/google-analytics-reports)
+
 Contributors: ko31,tarosky
 Tags:
 Requires at least: 4.5
@@ -11,7 +13,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 This is Google Analytics Reports.
 
-== Description ==
+## Description
 
 This is Google Analytics Reports.
 
