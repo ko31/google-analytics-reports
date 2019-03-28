@@ -12,6 +12,8 @@
  * @package         GoogleAnalyticsReports
  */
 
+use Miya\WP\GH_Auto_Updater;
+
 require_once( dirname( __FILE__ ) . '/vendor/autoload.php' );
 
 add_action( 'init', 'google_analytics_reports_activate_autoupdate' );
