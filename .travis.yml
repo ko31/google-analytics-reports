@@ -1,5 +1,4 @@
 sudo: false
-dist: trusty
 language: php
 notifications:
   email:
@@ -10,33 +9,19 @@ branches:
   - master
   - "/^v?[0-9\\.]+/"
 cache:
-  directories:
+  - composer
   - "$HOME/.composer/cache"
-matrix:
-  include:
-  - php: 7.1
-    env: WP_VERSION=latest
-  - php: 7.0
-    env: WP_VERSION=latest
-  - php: 7.1
-    env: WP_VERSION=trunk
-  - php: 7.0
-    env: WP_VERSION=trunk
-
+php:
+  - 7.0
+  - 7.2
+env:
+  - WP_VERSION=latest WP_MULTISITE=0
+  - WP_VERSION=nightly WP_MULTISITE=0
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
-  - |
-    if [ -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]; then
-      phpenv config-rm xdebug.ini
-    else
-      echo "xdebug.ini does not exist"
-    fi
-  - |
-    if [[ ! -z "$WP_VERSION" ]] ; then
-      bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
-      composer global require "phpunit/phpunit=4.8.*|5.7.*"
-    fi
-  - composer install
+  - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
+  - composer global require "phpunit/phpunit=4.8.*|5.7.*"
+  - composer instal
 script:
   - |
     if [[ ! -z "$WP_VERSION" ]] ; then
@@ -50,7 +35,7 @@ deploy:
   skip_cleanup: true
   api_key:
     secure: MA6hnBtGV7hdZ1/lMzXVTqb/uGANIXn5m/7wRchZBhxqPCERpQzzAdhjPEdJ3J/fUvbbNIszjNq14XhsBE5EvJVI27McMdRyc40LjTSzv8GUi2rtFoPWR1DFw638Ch0Pg4PqcpHljIxAq8N4S6ICLQmd2QOYZGbe48Vsh7ta8FkoJz3fB1G79NXurnVX7ODDhq3lGLA88WPpfjo80sFICz1VCheKJP9nTom4Eu7XeUDigEWQdi26lYtvyMinQ4u6L1spkB7dC25Ld6TBHFHi82PBJ9eN6GVhExFejo5H6ZtzJhwrUHPeLM2JckNb+j8ZzDmRh7EhlRx6uquGOFR982PFbbuBA3Z0UAmENLogDom29f6RdAUIAnGE6h1DqX26m68P40JQuuIjzrPXnCk2qKyb/9J60c3ttsG72SXs0wi0boj0f12OeSaDABrUOHuN0K4sZOC5VkA2V6XLvryB1wW/E5s4K/sj5Q9oDuuiMHVBLmzu2BslQC3Xk/u2OqNGqDfVhabAJAQqy6ZRoE8ZnIrAn1LZw+FGNMWGoIpi0FkbpAMy0whKNCGla7DhUU7K+xD16+hQPrgp2wgblVX4x/5Y+Ku1rk9dNp/kVHjHHUzsHHA66LAHrE0gzm2zXQlZnrsCIumBE3DKgj671St50qCDE3OArri9LSUQezNcoAY=
-  file: 'google-analytics-reports.zip'
+  file: google-analytics-reports.zip
   on:
     tags: true
     repo: tarosky/google-analytics-reports
