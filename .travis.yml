@@ -23,10 +23,7 @@ before_script:
   - composer global require "phpunit/phpunit=4.8.*|5.7.*"
   - composer instal
 script:
-  - |
-    if [[ ! -z "$WP_VERSION" ]] ; then
-      phpunit
-    fi
+  - phpunit
 after_success:
   - sed -i -e "s/nightly/${TRAVIS_TAG}/" $(basename $TRAVIS_REPO_SLUG).php
   - curl https://raw.githubusercontent.com/miya0001/auto-build/master/auto-build.sh | bash
