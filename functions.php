@@ -120,26 +120,32 @@ function gar_author_pv_ranking( $args = [] ) {
  * Get precise post data.
  *
  * @since 1.0.2
- * @param string $from  From date. Default '7daysAgo'
- * @param string $to    Default 'today'.
- * @param int    $limit Default 10.
+ * @param string $from       From date. Default '7daysAgo'
+ * @param string $to         Default 'today'.
+ * @param int    $limit      Default 10.
+ * @param array  $extra_args Arguments to override params.
  * @return array|WP_Error
  */
-function gar_post_precise_ranking( $from = '7daysAgo', $to = 'today', $limit = 10 ) {
+function gar_post_precise_ranking( $from = '7daysAgo', $to = 'today', $limit = 10, $extra_args = [] ) {
 	$dimension_index = get_option( 'google-analytics-reports-post_id' );
 	if ( ! $dimension_index ) {
 		return new WP_Error( 'not_set', __( 'This site does not collect posts\' page views.', 'google-analytics-reports' ), [
 			'status' => 500,
 		] );
 	}
+	$dimensions = [ sprintf( 'ga:dimension%d', $dimension_index ) ];
+	if ( $dimension_type_index = get_option( 'google-analytics-reports-type' ) ) {
+		$dimensions[] = sprintf( 'ga:dimension%d', $dimension_type_index );
+	}
 	$args = [
 		'from'          => $from,
 		'to'            => $to,
 		'pageSize'      => $limit * 2, // In case post's deletion.
-		'dimensions'    => sprintf( 'ga:dimension%d', $dimension_index ),
+		'dimensions'    => $dimensions,
 		'metrics'       => 'ga:pageviews',
 		'sortFieldName' => 'ga:pageviews',
 	];
+	$args = array_merge( $args, $extra_args );
 	$args     = apply_filters( 'google_analytics_reporters_ranking_per_post', $args );
 	$response = gar_reports( $args );
 	if ( is_wp_error( $response ) ) {
@@ -148,6 +154,9 @@ function gar_post_precise_ranking( $from = '7daysAgo', $to = 'today', $limit = 1
 	$results = [];
 	foreach ( $response[0]->getData()->getRows() as $row ) {
 		$dimensions = $row->dimensions;
+		if ( 1 < count( $dimensions ) ) {
+			array_pop( $dimensions );
+		}
 		foreach ( $row->metrics as $metric ) {
 			foreach ( $metric->values as $value ) {
 				$dimensions[] = (int) $value;

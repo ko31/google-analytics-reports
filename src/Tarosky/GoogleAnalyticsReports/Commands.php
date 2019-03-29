@@ -40,7 +40,7 @@ class Commands extends \WP_CLI_Command {
 	/**
 	 * Get popular ranking.
 	 *
-	 * @synopsis [--from=<from>] [--to=<to>] [--limit=<limit>]
+	 * @synopsis [--from=<from>] [--to=<to>] [--exclude_type=<exclude_type>] [--limit=<limit>]
 	 * @param array $args
 	 * @param array $assoc
 	 */
@@ -48,7 +48,21 @@ class Commands extends \WP_CLI_Command {
 		$from  = $assoc['from'] ?? '7daysAgo';
 		$to    = $assoc['to'] ?? 'today';
 		$limit = intval( $assoc['limit'] ?? 10 );
-		$result = gar_post_precise_ranking( $from, $to, $limit );
+		$exclude_type = array_filter( explode( ',', ( $assoc['exclude_type'] ?? $assoc['exclude_type'] ) ), function( $post_type ) {
+			return ! empty( $post_type ) && post_type_exists( $post_type );
+		} );
+		$extra = [];
+		if ( $exclude_type ) {
+			$extra['dimensionFilter'] = [
+				[
+					'dimensionName' => sprintf( 'ga:dimension%d', get_option( 'google-analytics-reports-type' ) ),
+					'operator'      => 'IN_LIST',
+					'expressions'   => $exclude_type,
+					'not'           => true,
+				]
+			];
+		}
+		$result = gar_post_precise_ranking( $from, $to, $limit, $extra );
 		if ( is_wp_error( $result ) ) {
 			\WP_CLI::error( $result->get_error_message() );
 		}
