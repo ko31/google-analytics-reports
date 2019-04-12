@@ -3,6 +3,7 @@ namespace Tarosky;
 
 
 use Tarosky\GoogleAnalyticsReports\Tracker;
+use Tarosky\GoogleAnalyticsReports\Uuid;
 
 class GoogleAnalyticsReports {
 	private $prefix = 'GoogleAnalyticsReports';
@@ -35,6 +36,7 @@ class GoogleAnalyticsReports {
 			GoogleAnalyticsReports\Admin::get_instance()->register();
 		}
 		Tracker::get_instance();
+		Uuid::get_instance();
 	}
 
 	public function get_prefix() {

@@ -78,24 +78,26 @@ final class Admin extends Singleton {
 				esc_html__( 'These section will be used for tracking code.', 'google-analytics-reports' )
 			);
 		}, $this->prefix );
-		foreach ( [
-					  'tracking_id' => __( 'Tracking ID', 'google-analytics-reports' ),
-					  'author'      => _x( 'Custom Dimension / Author', 'dimension-name', 'google-analytics-reports' ),
-					  'post_id'     => _x( 'Custom Dimension / Post ID', 'dimension-name', 'google-analytics-reports' ),
-					  'type'        => _x( 'Custom Dimension / Post type', 'dimension-name', 'google-analytics-reports' ),
-				  ] as $key => $label ) {
+		$options = apply_filters( 'google_analytics_reports_options', [
+			'tracking_id' => __( 'Tracking ID', 'google-analytics-reports' ),
+			'author'      => _x( 'Custom Dimension / Author', 'dimension-name', 'google-analytics-reports' ),
+			'post_id'     => _x( 'Custom Dimension / Post ID', 'dimension-name', 'google-analytics-reports' ),
+			'type'        => _x( 'Custom Dimension / Post type', 'dimension-name', 'google-analytics-reports' ),
+		] );
+		foreach ( $options as $key => $label ) {
 			$option_key = "google-analytics-reports-{$key}";
 			add_settings_field( $option_key, $label, function() use ( $option_key, $section_name, $label, $key ) {
 				switch( $key ) {
 					case 'tracking_id':
-						$desc = esc_html__( 'If you want to display tracking code, enter tracking ID. If you enable WooCommerce Google Analytics Integration, you don\'t have to fill.', 'google-analytics-reports' );
+						$desc = __( 'If you want to display tracking code, enter tracking ID. If you enable WooCommerce Google Analytics Integration, you don\'t have to fill.', 'google-analytics-reports' );
 						$placeholder = 'e.g. UA-xxxxxxxx-1';
 						$type = 'text';
 						break;
 					default:
 						// translators: %s is dimension name.
-						$desc = esc_html( sprintf( __( 'To combine %s to every single page views, enter custom dimension index.', 'google-analytics-reports' ), $label ) );
-						$placeholder = '';
+						$desc = sprintf( __( 'To combine %s to every single page views, enter custom dimension index.', 'google-analytics-reports' ), $label );
+						$desc = apply_filters( 'google_analytics_reports_option_desc', $desc, $key );
+						$placeholder = apply_filters( 'google_analytics_reports_option_placeholder', '', $key );
 						$type = 'number';
 						break;
 				}
@@ -104,7 +106,7 @@ final class Admin extends Singleton {
 					esc_attr( $option_key ),
 					esc_attr( get_option( $option_key ) ),
 					$type,
-					$desc,
+					esc_html( $desc ),
 					esc_attr( $placeholder )
 				);
 			}, $this->prefix,  $section_name );

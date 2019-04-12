@@ -26,7 +26,7 @@ class Tracker extends Singleton {
 	 */
 	protected function __construct() {
 		add_filter( 'woocommerce_ga_snippet_create', [ $this, 'woocommerce_ga_snippet' ] );
-		add_action( 'wp_head', [ $this, 'render_tracking_code' ], 1 );
+		add_action( 'wp_head', [ $this, 'render_tracking_code' ], 100 );
 	}
 
 	/**
