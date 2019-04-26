@@ -4,7 +4,7 @@
   "main": "Gruntfile.js",
   "author": "YOUR NAME HERE",
   "scripts": {
-    "start": "Define some script here!"
+    "start": "echo 'Define some script here!'"
   },
   "devDependencies": {
     "grunt": "~0.4.5",
