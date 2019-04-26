@@ -24,10 +24,10 @@ before_script:
 script:
   - phpunit
 after_success:
-  - sed -i -e "s/nightly/${TRAVIS_TAG}/" $(basename $TRAVIS_REPO_SLUG).php
-  - curl https://raw.githubusercontent.com/miya0001/auto-build/master/auto-build.sh | bash
   - curl -L https://raw.githubusercontent.com/fumikito/wp-readme/master/wp-readme.php | php
   - sed -i -e "s/nightly/${TRAVIS_TAG}/" readme.txt
+  - sed -i -e "s/nightly/${TRAVIS_TAG}/" $(basename $TRAVIS_REPO_SLUG).php
+  - curl https://raw.githubusercontent.com/miya0001/auto-build/master/auto-build.sh | bash
 deploy:
   provider: releases
   skip_cleanup: true
